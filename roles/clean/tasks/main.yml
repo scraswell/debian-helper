@@ -1,0 +1,70 @@
+- name: Determine VG information from Installation Disk
+  ansible.builtin.shell:
+    cmd: |
+      pvs --select 'pv_name=~"{{ installation_device }}"' --noheadings -o vg_name,pv_name --reportformat=json | jq -cr '.report[].pv'
+  register: vg_info_result
+  changed_when: false
+  ignore_errors: true
+
+- name: Set VG information
+  ansible.builtin.set_fact:
+    vg_info: "{{ vg_info_result.stdout | from_json }}"
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Deactivate LVs
+  ansible.builtin.shell:
+    cmd: |
+      lvchange -an --force {{ item.vg_name }}
+  with_items: "{{ vg_info }}"
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Remove LVs
+  ansible.builtin.shell:
+    cmd: |
+      lvremove -f {{ item.vg_name }}
+  with_items: "{{ vg_info }}"
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Remove VGs
+  ansible.builtin.shell:
+    cmd: |
+      vgremove -f {{ item.vg_name }}
+  with_items: "{{ vg_info }}"
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Remove PVs
+  ansible.builtin.shell:
+    cmd: |
+      pvremove -f {{ item.pv_name }}
+  with_items: "{{ vg_info }}"
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Wipe LVM data
+  ansible.builtin.shell:
+    cmd: |
+      wipefs -a {{ installation_device }} && \
+        dd if=/dev/zero of={{ installation_device }} bs=1M count=1
+  when:
+    - vg_info_result.rc == 0
+    - vg_info_result.stdout != ""
+
+- name: Clean disk
+  ansible.builtin.shell:
+    cmd: |
+      sgdisk -Z {{ installation_device }}
+
+- name: Execute partprobe
+  ansible.builtin.shell:
+    cmd: |
+      partprobe {{ installation_device }}
+  changed_when: false

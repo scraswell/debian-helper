@@ -1,0 +1,83 @@
+---
+- name: Read kernel parameters
+  ansible.builtin.shell:
+    cmd: |
+      cat /proc/cmdline | \
+        grep -o -P 'install_params={[^}]+}' | \
+        grep -o '{.*}' | \
+        sed 's/\\//g' | \
+        jq -cr
+  register: kernel_parameters_result
+  ignore_errors: true
+  changed_when: false
+
+- name: Set installation parameters
+  ansible.builtin.set_fact:
+    install_params: "{{ kernel_parameters_result.stdout | from_json | default({}) }}"
+  when:
+    - kernel_parameters_result.stdout
+    - kernel_parameters_result.rc == 0
+
+- name: Parse installation parameters
+  block:
+    - name: Parse 
+      ansible.builtin.include_tasks: parse_install_parameters.yml
+  when:
+    - install_params
+
+- name: Find installation disk
+  ansible.builtin.shell:
+    cmd: |
+      lsblk -b --json | \
+        jq '[ .blockdevices[] | select (.type == "disk" and .rm == false and .ro == false and .size > (20 * 1024 * 1024 * 1024)) ]'
+  register: installation_disk_result
+  changed_when: false
+
+- name: Set installation disk
+  ansible.builtin.set_fact:
+    installation_disk: "{{ installation_disk_result.stdout|from_json }}"
+
+- name: Fail when unable to determine installation disk
+  ansible.builtin.fail:
+    msg: "Could not determine installation disk."
+  when: installation_disk | length != 1
+
+- name: Set installation disk
+  ansible.builtin.set_fact:
+    installation_disk: "{{ installation_disk[0] }}"
+
+- name: Combine Ansible device info
+  ansible.builtin.set_fact:
+    installation_disk: "{{ installation_disk | ansible.builtin.combine(hostvars[inventory_hostname].ansible_devices[installation_disk.name]) }}"
+
+- name: Show installation disk
+  ansible.builtin.debug:
+    msg: "Installation disk: {{ installation_disk }}."
+
+- name: Set installation device path
+  ansible.builtin.set_fact:
+    installation_device: "/dev/{{ installation_disk.name }}"
+
+- name: Show installation device
+  ansible.builtin.debug:
+    msg: "Installation will continue on {{ installation_device }}."
+
+- name: Set interface info
+  ansible.builtin.set_fact:
+    network_interfaces: "{{ hostvars[inventory_hostname].ansible_interfaces }}"
+
+- name: Set individual interface info
+  ansible.builtin.set_fact:
+    network_interface: "{{ network_interface | default({}) | combine ( { interface: hostvars[inventory_hostname]['ansible_'+interface] } ) }}"
+  loop: "{{ network_interfaces }}"
+  loop_control:
+    loop_var: interface
+
+- name: Find main inteface
+  ansible.builtin.set_fact:
+    main_if: "{{ network_interface[current_if].device }}"
+  loop: "{{ network_interfaces }}"
+  loop_control:
+    loop_var: current_if
+  when:
+    network_interface[current_if].active and network_interface[current_if].device != "lo"

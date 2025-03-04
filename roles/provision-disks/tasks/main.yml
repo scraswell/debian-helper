@@ -1,0 +1,24 @@
+---
+- name: Set EFI partition info
+  ansible.builtin.set_fact:
+    efi_start_sector: "{{ start_sector }}"
+    efi_sectors: "{{ ((efi_size_bytes | int) / (installation_disk.sectorsize | int)) | int }}"
+
+
+- name: Show vars
+  ansible.builtin.debug:
+    msg: "{{ efi_size_mib }} {{ efi_start_sector }} {{ efi_sectors }} {{ installation_disk }}"
+
+- name: Provision disk
+  block:
+    - name: Provision Installation Disk
+      ansible.builtin.include_tasks: provision_installation_disk.yml
+  when:
+    - not lvm
+
+- name: Provision disk (LVM)
+  block:
+    - name: Provision Installation Disk
+      ansible.builtin.include_tasks: provision_installation_disk_lvm.yml
+  when:
+    - lvm

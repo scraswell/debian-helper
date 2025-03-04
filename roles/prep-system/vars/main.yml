@@ -1,0 +1,4 @@
+---
+efi_dev: "{{ installation_device }}1"
+swap_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_swap_name if lvm else installation_device ~ '2' }}"
+root_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_root_name if lvm else installation_device ~ '3' }}"

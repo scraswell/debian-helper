@@ -1,0 +1,14 @@
+---
+- name: Read disk provisioning information
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../provision-disks/defaults/main.yml"
+  when:
+    - root_dev is not defined or swap_dev is not defined or efi_dev is not defined
+
+- name: Mount devices
+  ansible.builtin.shell:
+    cmd: |
+      swapon {{ swap_dev }} && \
+      mount {{ root_dev }} {{ bootstrap_dir }} && \
+      mkdir -pv {{ bootstrap_dir }}/boot && \
+      mount {{ efi_dev }} {{ bootstrap_dir }}/boot

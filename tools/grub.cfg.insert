@@ -1,0 +1,26 @@
+search --file --set=include_dir /boot/grub/grub_include.cfg
+source (${include_dir})/boot/grub/grub_include.cfg
+
+# Menu entries
+
+menuentry "Arch Linux install medium (x86_64, ${archiso_platform})" --class arch --class gnu-linux --class gnu --class os --id 'archlinux' {
+    set gfxpayload=keep
+
+    configure_installation
+
+    echo $install_params
+    echo -n "Continue with these parameters (y/n): "
+    read continue
+
+    if [ $continue == "y" ]
+    then
+        linux /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux \
+            archisobasedir=%INSTALL_DIR% \
+            archisosearchuuid=%ARCHISO_UUID% \
+            install_params=${install_params}
+        initrd /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
+    else
+        configfile $prefix/grub.cfg
+    fi
+}
+
