@@ -1,0 +1,23 @@
+---
+- name: Read system prep information
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../prep-system/defaults/main.yml"
+  when:
+    - bootstrap_dir is not defined
+
+- name: Read system prep information
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../install-os/defaults/main.yml"
+  when:
+    - os_name is not defined
+
+- name: Configure System
+  block:
+    - name: Configure System
+      ansible.builtin.include_tasks: configure_system.yml
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  when:
+    - os_name == "debian"
+ 

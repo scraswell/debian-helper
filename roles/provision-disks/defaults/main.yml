@@ -1,0 +1,18 @@
+---
+lvm: false
+
+vg_name: vg0
+lv_root_name: root
+lv_swap_name: swap
+
+efi_dev: "{{ installation_device }}1"
+swap_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_swap_name if lvm else installation_device ~ '2' }}"
+root_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_root_name if lvm else installation_device ~ '3' }}"
+
+start_sector: 2048
+
+efi_size_mib: 300
+efi_size_bytes: "{{ efi_size_mib * 1024 * 1024 }}"
+
+swap_size_gib: 4
+swap_size_bytes: "{{ swap_size_gib * 1024 * 1024 * 1024 }}"

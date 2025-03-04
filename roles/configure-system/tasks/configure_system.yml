@@ -1,0 +1,82 @@
+---
+- name: Configure clock
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ bootstrap_dir }} ln -sf /usr/share/zoneinfo/Canada/Atlantic /etc/localtime
+
+- name: Copy locale.gen
+  ansible.builtin.copy:
+    content: |
+      en_US.UTF-8 UTF-8
+    dest: "{{ bootstrap_dir }}/etc/locale.gen"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Generate locale
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ bootstrap_dir }} locale-gen
+
+- name: Copy locale.conf
+  ansible.builtin.copy:
+    content: |
+      LANG=en_US.UTF-8
+    dest: "{{ bootstrap_dir }}/etc/locale.conf"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Update locale
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ bootstrap_dir }} update-locale LANG=en_US.UTF-8 LANGUAGE
+
+- name: Copy issue
+  ansible.builtin.copy:
+    content: |
+      {{ os_name }} GNU/Linux (\v) \n (\4) \l
+    dest: "{{ bootstrap_dir }}/etc/issue"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Create .vimrc
+  ansible.builtin.copy:
+    content: |
+      :set encoding=utf-8
+      :set tabstop=4
+      :set shiftwidth=4
+      :set softtabstop=4
+      :set expandtab
+      :set nowrap
+      :set number
+      :set ruler
+      :set nobackup
+      :set noundofile
+      :set smartindent
+      :filetype indent on
+      :syntax on
+    dest: "{{ vimrc_dest }}"
+    mode: 0644
+    owner: root
+    group: root
+  loop:
+    - "{{ bootstrap_dir }}/root/.vimrc"
+    - "{{ bootstrap_dir }}/etc/skel/.vimrc"
+  loop_control:
+    loop_var: vimrc_dest
+
+- name: Set root password
+  ansible.builtin.shell:
+    cmd: |
+      echo "root:{{ root_password | default('password') }}" | arch-chroot {{ bootstrap_dir }} chpasswd
+
+- name: Configure sudoers
+  ansible.builtin.copy:
+    content: |
+      %sudo ALL=(ALL) NOPASSWD: ALL
+    dest: "{{ bootstrap_dir }}/etc/sudoers.d/99-wheel_no_passwd"
+    mode: 0644
+    owner: root
+    group: root

@@ -1,0 +1,30 @@
+---
+- name: Set swap partition info
+  ansible.builtin.set_fact:
+    swap_start_sector: "{{ (efi_start_sector | int) + (efi_sectors | int) | int }}"
+    swap_sectors: "{{ ((swap_size_bytes | int) / (installation_disk.sectorsize | int)) | int }}"
+
+- name: Set root partition info
+  ansible.builtin.set_fact:
+    root_start_sector: "{{ (swap_start_sector | int) + (swap_sectors | int) | int }}"
+
+- name: Partition the device
+  ansible.builtin.shell:
+    cmd: |
+      echo "label: gpt" | sfdisk {{ installation_device }} && \
+        echo "{{ efi_start_sector }} {{ efi_sectors }} U -" | sfdisk {{ installation_device }} --append && \
+        echo "{{ swap_start_sector }} {{ swap_sectors }} S -" | sfdisk {{ installation_device }} --append && \
+        echo "{{ root_start_sector }} - L -" | sfdisk {{ installation_device }} --append
+
+- name: Format the partitions
+  ansible.builtin.shell:
+    cmd: |
+      mkfs -t vfat {{ efi_dev }} && \
+      mkswap {{ swap_dev }} && \
+      mkfs -t ext4 -F {{ root_dev }}
+
+- name: Execute partprobe
+  ansible.builtin.shell:
+    cmd: |
+      partprobe {{ installation_device }}
+  changed_when: false

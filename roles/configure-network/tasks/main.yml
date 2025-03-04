@@ -1,0 +1,54 @@
+---
+- name: Read system prep information
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../prep-system/defaults/main.yml"
+  when:
+    - bootstrap_dir is not defined
+
+- name: Read system prep information
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../install-os/defaults/main.yml"
+  when:
+    - os_name is not defined
+
+- name: Set hostname
+  ansible.builtin.copy:
+    content: |
+      {{ hostname }}
+    dest: "{{ bootstrap_dir }}/etc/hostname"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Set hosts
+  ansible.builtin.copy:
+    content: |
+      127.0.0.1        localhost
+      ::1              localhost
+      127.0.1.1        {{ hostname }} {{ hostname }}.{{ local_domain }}
+    dest: "{{ bootstrap_dir }}/etc/hosts"
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Configure Network (Debian)
+  block:
+    - name: Configure Network with MACVLANs Enabled
+      ansible.builtin.include_tasks: configure_network_debian.yml
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  when:
+    - os_name == "debian"
+    - macvlan_interfaces
+
+- name: Configure Network (Debian - Bridged Adapter)
+  block:
+    - name: Configure Network with Bridged Adapter
+      ansible.builtin.include_tasks: configure_network_debian_bridge.yml
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  when:
+    - os_name == "debian"
+    - not macvlan_interfaces

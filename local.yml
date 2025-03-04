@@ -1,0 +1,69 @@
+---
+- name: Inspect System
+  hosts: archiso
+  roles:
+    - role: inspect
+  tags:
+    - always
+
+- name: Clean System
+  hosts: archiso
+  roles:
+    - role: clean
+      when:
+        - init is defined and init
+  tags:
+    - clean
+
+- name: Provision Disks
+  hosts: archiso
+  roles:
+    - role: provision-disks
+      when:
+        - init is defined and init
+  tags:
+    - provision-disks
+
+- name: Prep System
+  hosts: archiso
+  roles:
+    - role: prep-system
+  tags:
+    - always
+
+- name: Install OS
+  hosts: archiso
+  roles:
+    - role: install-os
+      when:
+        - init is defined and init
+  tags:
+    - install-os
+
+- name: Configure System
+  hosts: archiso
+  roles:
+    - role: configure-system
+  tags:
+    - configure-system
+
+- name: Configure Network
+  hosts: archiso
+  roles:
+    - role: configure-network
+  tags:
+    - configure-network
+
+- name: Configure Bootloader
+  hosts: archiso
+  roles:
+    - role: configure-bootloader
+  tags:
+    - configure-bootloader
+
+- name: Complete Installation
+  hosts: archiso
+  roles:
+    - role: complete-installation
+  tags:
+    - complete-installation
