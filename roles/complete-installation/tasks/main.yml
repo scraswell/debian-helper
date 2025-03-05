@@ -7,7 +7,7 @@
 
 - name: Read disk provisioning information
   ansible.builtin.include_vars:
-    file: "{{ role_path }}/../provision-disks/defaults/main.yml"
+    file: "{{ role_path }}/../provision_disks/defaults/main.yml"
   when:
     - root_dev is not defined or swap_dev is not defined or efi_dev is not defined
 

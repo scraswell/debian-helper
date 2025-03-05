@@ -1,0 +1,18 @@
+services:
+  github-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    container_name: github-runner
+    restart: always
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_data:/home/github/_work:rw
+    environment:
+      - GH_REPO_URL=${GH_REPO_URL}
+      - GH_RUNNER_TOKEN=${GH_RUNNER_TOKEN}
+
+volumes:
+  runner_data:
+    name: runner_data

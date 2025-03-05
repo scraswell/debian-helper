@@ -11,10 +11,14 @@
 - name: Partition the device
   ansible.builtin.shell:
     cmd: |
+      set -o pipefail && \
       echo "label: gpt" | sfdisk {{ installation_device }} && \
         echo "{{ efi_start_sector }} {{ efi_sectors }} U -" | sfdisk {{ installation_device }} --append && \
         echo "{{ swap_start_sector }} {{ swap_sectors }} S -" | sfdisk {{ installation_device }} --append && \
         echo "{{ root_start_sector }} - L -" | sfdisk {{ installation_device }} --append
+    executable: /bin/bash
+  register: partition_result
+  changed_when: partition_result.rc == 0
 
 - name: Format the partitions
   ansible.builtin.shell:
@@ -22,6 +26,9 @@
       mkfs -t vfat {{ efi_dev }} && \
       mkswap {{ swap_dev }} && \
       mkfs -t ext4 -F {{ root_dev }}
+    executable: /bin/bash
+  register: format_result
+  changed_when: format_result.rc == 0
 
 - name: Execute partprobe
   ansible.builtin.shell:

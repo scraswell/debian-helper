@@ -18,11 +18,11 @@
 - name: Provision Disks
   hosts: archiso
   roles:
-    - role: provision-disks
+    - role: provision_disks
       when:
         - init is defined and init
   tags:
-    - provision-disks
+    - provision_disks
 
 - name: Prep System
   hosts: archiso

@@ -1,9 +1,4 @@
 ---
-- name: Show installation parameters
-  ansible.builtin.debug:
-    msg: "{{ install_params }}"
-  when: install_params
-
 - name: Set installation variables
   ansible.builtin.set_fact:
     reboot: "{{ install_params.reboot }}"
@@ -27,8 +22,3 @@
       mask_length: "{{ install_params.mask }}"
       gateway: "{{ install_params.gateway }}"
       broadcast: "{{ install_params.broadcast }}"
-
-- name: Set derived variables
-  ansible.builtin.set_fact:
-    efi_size_bytes: "{{ ((efi_size_mib | int) * 1024 * 1024) | int }}"
-    swap_size_bytes: "{{ ((swap_size_gib | int) * 1024 * 1024 * 1024) | int }}"

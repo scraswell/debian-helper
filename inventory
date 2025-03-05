@@ -1,2 +1,2 @@
 [local]
-archiso ansible_host=localhost
+archiso ansible_host=localhost ansible_connection=local

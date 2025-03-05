@@ -10,15 +10,15 @@
     msg: "{{ efi_size_mib }} {{ efi_start_sector }} {{ efi_sectors }} {{ installation_disk }}"
 
 - name: Provision disk
+  when:
+    - not lvm
   block:
     - name: Provision Installation Disk
       ansible.builtin.include_tasks: provision_installation_disk.yml
-  when:
-    - not lvm
 
 - name: Provision disk (LVM)
+  when:
+    - lvm
   block:
     - name: Provision Installation Disk
       ansible.builtin.include_tasks: provision_installation_disk_lvm.yml
-  when:
-    - lvm
