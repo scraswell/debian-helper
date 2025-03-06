@@ -1,0 +1,3 @@
+---
+configure_bootloader_bootstrap_dir: "{{ bootstrap_dir | default('/mnt') }}"
+configure_bootloader_osname: "{{ osname | default('debian') }}"

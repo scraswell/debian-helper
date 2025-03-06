@@ -1,0 +1,57 @@
+---
+- name: Configure network interfaces for MACVLANs (static IP)
+  ansible.builtin.copy:
+    content: |
+      auto lo
+      iface lo inet loopback
+
+      iface {{ main_if }} inet manual
+
+      auto macvlan0
+      iface macvlan0 inet {{ configure_network_ip_address.type }}
+          address {{ configure_network_ip_address.address }}/{{ configure_network_ip_address.mask_length }}
+          gateway {{ configure_network_ip_address.gateway }}
+          broadcast {{ configure_network_ip_address.broadcast }}
+          pre-up ip link set dev {{ main_if }} up
+          pre-up ip link add macvlan0 link {{ main_if }} type macvlan mode bridge
+          post-down ip link del macvlan0
+          post-down ip link set dev {{ main_if }} down
+
+    dest: "{{ configure_network_bootstrap_dir }}/etc/network/interfaces"
+    mode: '0644'
+    owner: root
+    group: root
+  when: configure_network_ip_address.type == 'static'
+
+- name: Configure resolv.conf
+  ansible.builtin.copy:
+    content: |
+      nameservers {{ configure_network_ip_address.gateway }}
+      search {{ configure_network_local_domain }}
+
+    dest: "{{ configure_network_bootstrap_dir }}/etc/resolv.conf"
+    mode: '0644'
+    owner: root
+    group: root
+  when: configure_network_ip_address.type == 'static'
+
+- name: Configure network interfaces for MACVLANs (DHCP)
+  ansible.builtin.copy:
+    content: |
+      auto lo
+      iface lo inet loopback
+
+      iface {{ main_if }} inet manual
+
+      auto macvlan0
+      iface macvlan0 inet {{ configure_network_ip_address.type }}
+          pre-up ip link set dev {{ main_if }} up
+          pre-up ip link add macvlan0 link {{ main_if }} type macvlan mode bridge
+          post-down ip link del macvlan0
+          post-down ip link set dev {{ main_if }} down
+
+    dest: "{{ configure_network_bootstrap_dir }}/etc/network/interfaces"
+    mode: '0644'
+    owner: root
+    group: root
+  when: configure_network_ip_address.type == 'dhcp'

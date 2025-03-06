@@ -1,0 +1,59 @@
+---
+- name: Partition the device
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail && \
+      echo "label: gpt" | sfdisk {{ installation_device }} && \
+      echo "{{ provision_disks_efi_start_sector }} {{ provision_disks_efi_sectors }} U -" | sfdisk {{ installation_device }} --append && \
+      echo "{{ provision_disks_lvm_start_sector }} - L -" | sfdisk {{ installation_device }} --append
+    executable: /bin/bash
+  register: partition_result
+  changed_when: partition_result.rc == 0
+
+- name: Format the EFI partition
+  ansible.builtin.shell:
+    cmd: |
+      mkfs -t vfat {{ provision_disks_efi_dev }}
+    executable: /bin/bash
+  register: format_efi_result
+  changed_when: format_efi_result.rc == 0
+
+- name: Create physical volume
+  ansible.builtin.shell:
+    cmd: |
+      pvcreate -f {{ installation_device }}2
+    executable: /bin/bash
+  register: pv_result
+  changed_when: pv_result.rc == 0
+
+- name: Create volume group
+  ansible.builtin.shell:
+    cmd: |
+      vgcreate -f {{ provision_disks_vg_name }} {{ installation_device }}2
+    executable: /bin/bash
+  register: vg_result
+  changed_when: vg_result.rc == 0
+
+- name: Create logical volumes
+  ansible.builtin.shell:
+    cmd: |
+      lvcreate -y -L {{ provision_disks_swap_size_bytes | int // 1024 // 1024 }}M -n {{ provision_disks_lv_swap_name }} {{ provision_disks_vg_name }} && \
+      lvcreate -y -l 100%FREE -n {{ provision_disks_lv_root_name }} {{ provision_disks_vg_name }}
+    executable: /bin/bash
+  register: lv_result
+  changed_when: lv_result.rc == 0
+
+- name: Format the logical volumes
+  ansible.builtin.shell:
+    cmd: |
+      mkswap {{ provision_disks_swap_dev }} && \
+      mkfs -t ext4 -F {{ provision_disks_root_dev }}
+    executable: /bin/bash
+  register: format_result
+  changed_when: format_result.rc == 0
+
+- name: Execute partprobe
+  ansible.builtin.shell:
+    cmd: |
+      partprobe {{ installation_device }}
+  changed_when: false

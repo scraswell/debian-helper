@@ -1,0 +1,32 @@
+---
+- name: Validate installation_device
+  ansible.builtin.assert:
+    that:
+      - installation_device is defined
+      - installation_device is match("^(\/dev\/[a-z]+)$")
+    fail_msg: "The installation_device variable must be defined and match the pattern ^/dev/[a-z]+$"
+    success_msg: "The installation_device variable is defined and matches the pattern ^/dev/[a-z]+$"
+
+- name: Generate FSTAB
+  ansible.builtin.shell:
+    cmd: |
+      genfstab -U {{ complete_installation_bootstrap_dir }} > {{ complete_installation_bootstrap_dir }}/etc/fstab
+  register: genfstab_result
+  changed_when: genfstab_result.rc == 0
+
+- name: Unmount Devices
+  ansible.builtin.shell:
+    cmd: |
+      umount {{ complete_installation_bootstrap_dir }}/boot && \
+      umount {{ complete_installation_bootstrap_dir }} && \
+      swapoff {{ complete_installation_swap_dev }}
+  register: umount_result
+  changed_when: umount_result.rc == 0
+
+- name: Reboot system
+  ansible.builtin.shell:
+    cmd: |
+      reboot
+  when:
+    - complete_installation_reboot
+  changed_when: false

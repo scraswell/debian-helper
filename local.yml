@@ -18,52 +18,52 @@
 - name: Provision Disks
   hosts: archiso
   roles:
-    - role: provision-disks
+    - role: provision_disks
       when:
         - init is defined and init
   tags:
-    - provision-disks
+    - provision_disks
 
 - name: Prep System
   hosts: archiso
   roles:
-    - role: prep-system
+    - role: prep_system
   tags:
     - always
 
 - name: Install OS
   hosts: archiso
   roles:
-    - role: install-os
+    - role: install_os
       when:
         - init is defined and init
   tags:
-    - install-os
+    - install_os
 
 - name: Configure System
   hosts: archiso
   roles:
-    - role: configure-system
+    - role: configure_system
   tags:
-    - configure-system
+    - configure_system
 
 - name: Configure Network
   hosts: archiso
   roles:
-    - role: configure-network
+    - role: configure_network
   tags:
-    - configure-network
+    - configure_network
 
 - name: Configure Bootloader
   hosts: archiso
   roles:
-    - role: configure-bootloader
+    - role: configure_bootloader
   tags:
-    - configure-bootloader
+    - configure_bootloader
 
 - name: Complete Installation
   hosts: archiso
   roles:
-    - role: complete-installation
+    - role: complete_installation
   tags:
-    - complete-installation
+    - complete_installation

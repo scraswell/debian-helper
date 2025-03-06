@@ -1,0 +1,10 @@
+---
+- name: Configure System
+  when:
+    - configure_system_osname == "debian"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  block:
+    - name: Configure System
+      ansible.builtin.include_tasks: configure_system.yml

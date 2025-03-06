@@ -1,0 +1,24 @@
+---
+- name: Set installation variables
+  ansible.builtin.set_fact:
+    reboot: "{{ install_params.reboot }}"
+    hostname: "{{ install_params.hostname }}"
+    hosttype: "{{ install_params.hosttype }}"
+    local_domain: "{{ install_params.domain }}"
+    username: "{{ install_params.username }}"
+    userpasswd: "{{ install_params.userpasswd }}"
+    userpubkey: "{{ install_params.userpubkey }}"
+    os_name: "{{ install_params.osname }}"
+    lvm: "{{ install_params.lvm }}"
+    vg_name: "{{ install_params.vgname }}"
+    lv_root_name: "{{ install_params.lvname_root }}"
+    lv_swap_name: "{{ install_params.lvname_swap }}"
+    swap_size_gib: "{{ install_params.swap_size_gb }}"
+    efi_size_mib: "{{ install_params.efi_size_gb }}"
+    macvlan_interfaces: "{{ install_params.macvlan }}"
+    network_ip_address:
+      type: "{{ install_params.conntype }}"
+      address: "{{ install_params.ip }}"
+      mask_length: "{{ install_params.mask }}"
+      gateway: "{{ install_params.gateway }}"
+      broadcast: "{{ install_params.broadcast }}"

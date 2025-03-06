@@ -18,16 +18,17 @@
     - kernel_parameters_result.stdout
     - kernel_parameters_result.rc == 0
 
-- name: Parse installation parameters
-  block:
-    - name: Parse 
-      ansible.builtin.include_tasks: parse_install_parameters.yml
+- name: Read installation parameters
   when:
     - install_params
+  block:
+    - name: Parse
+      ansible.builtin.include_tasks: "{{ role_path }}/../../common/parse_install_parameters.yml"
 
 - name: Find installation disk
   ansible.builtin.shell:
     cmd: |
+      set -o pipefail && \
       lsblk -b --json | \
         jq '[ .blockdevices[] | select (.type == "disk" and .rm == false and .ro == false and .size > (20 * 1024 * 1024 * 1024)) ]'
   register: installation_disk_result
@@ -35,7 +36,7 @@
 
 - name: Set installation disk
   ansible.builtin.set_fact:
-    installation_disk: "{{ installation_disk_result.stdout|from_json }}"
+    installation_disk: "{{ installation_disk_result.stdout | from_json }}"
 
 - name: Fail when unable to determine installation disk
   ansible.builtin.fail:
@@ -68,7 +69,7 @@
 
 - name: Set individual interface info
   ansible.builtin.set_fact:
-    network_interface: "{{ network_interface | default({}) | combine ( { interface: hostvars[inventory_hostname]['ansible_'+interface] } ) }}"
+    network_interface: "{{ network_interface | default({}) | combine({interface: hostvars[inventory_hostname]['ansible_' + interface]}) }}"
   loop: "{{ network_interfaces }}"
   loop_control:
     loop_var: interface

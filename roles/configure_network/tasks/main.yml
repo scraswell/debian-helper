@@ -1,0 +1,40 @@
+---
+- name: Set hostname
+  ansible.builtin.copy:
+    content: |
+      {{ configure_network_hostname }}
+    dest: "{{ configure_network_bootstrap_dir }}/etc/hostname"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Set hosts
+  ansible.builtin.copy:
+    content: |
+      127.0.0.1        localhost
+      ::1              localhost
+      127.0.1.1        {{ configure_network_hostname }} {{ configure_network_hostname }}.{{ configure_network_local_domain }}
+    dest: "{{ configure_network_bootstrap_dir }}/etc/hosts"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: "Configure Network ({{ configure_network_osname }})"
+  when:
+    - macvlan_interfaces
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  block:
+    - name: Configure Network with MACVLANs Enabled
+      ansible.builtin.include_tasks: configure_network_{{ configure_network_osname }}.yml
+
+- name: Configure Network (Bridged Adapter - {{ configure_network_osname }})
+  when:
+    - not macvlan_interfaces
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  block:
+    - name: Configure Network with Bridged Adapter
+      ansible.builtin.include_tasks: configure_network_{{ configure_network_osname }}_bridge.yml

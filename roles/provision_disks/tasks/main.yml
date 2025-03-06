@@ -1,0 +1,30 @@
+---
+- name: Validate installation_device
+  ansible.builtin.assert:
+    that:
+      - installation_device is defined
+      - installation_device is match("^(\/dev\/[a-z]+)$")
+    fail_msg: "The installation_device variable must be defined and match the pattern ^/dev/[a-z]+$"
+    success_msg: "The installation_device variable is defined and matches the pattern ^/dev/[a-z]+$"
+
+- name: Validate installation_disk
+  ansible.builtin.assert:
+    that:
+      - installation_disk is defined
+      - installation_disk.sectorsize is defined and (installation_disk.sectorsize | int) > 0
+    fail_msg: "The installation_disk variable must be defined and have a sectorsize greater than 0"
+    success_msg: "The installation_disk variable is defined and has a sectorsize greater than 0"
+
+- name: Provision disk
+  when:
+    - not provision_disks_lvm
+  block:
+    - name: Provision Installation Disk
+      ansible.builtin.include_tasks: provision_installation_disk.yml
+
+- name: Provision disk (LVM)
+  when:
+    - provision_disks_lvm
+  block:
+    - name: Provision Installation Disk
+      ansible.builtin.include_tasks: provision_installation_disk_lvm.yml

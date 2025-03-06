@@ -1,0 +1,10 @@
+---
+- name: Install Base System
+  when:
+    - install_os_osname == "debian"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+    PATH: /bin:/sbin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+  block:
+    - name: Bootstrap Debian
+      ansible.builtin.include_tasks: bootstrap_debian.yml

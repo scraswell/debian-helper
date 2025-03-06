@@ -1,0 +1,13 @@
+---
+configure_network_bootstrap_dir: "{{ bootstrap_dir | default('/mnt') }}"
+configure_network_osname: "{{ os_name | default('debian') }}"
+configure_network_hostname: "{{ hostname | default(configure_network_osname) }}"
+configure_network_local_domain: "{{ domain | default('localdomain') }}"
+configure_network_macvlan_interfaces: "{{ macvlan_interfaces | default(false) }}"
+
+configure_network_ip_address:
+  type: "{{ network_ip_address.type | default('dhcp') }}"
+  address: "{{ network_ip_address.address | default('192.168.1.2') }}"
+  mask_length: "{{ network_ip_address.mask_length | default('23') }}"
+  gateway: "{{ network_ip_address.gateway | default('192.168.1.1') }}"
+  broadcast: "{{ network_ip_address.broadcast | default('192.168.2.255') }}"

@@ -1,0 +1,14 @@
+---
+- name: Install GRUB
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ configure_bootloader_bootstrap_dir }} grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+  register: grub_install_result
+  changed_when: grub_install_result.rc == 0
+
+- name: Create GRUB config
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ configure_bootloader_bootstrap_dir }} update-grub2
+  register: grub_config_result
+  changed_when: grub_config_result.rc == 0

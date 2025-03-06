@@ -1,0 +1,6 @@
+---
+configure_system_osname: "{{ os_name | default('debian') }}"
+configure_system_bootstrap_dir: "{{ bootstrap_dir | default('/mnt') }}"
+configure_system_zoneinfo: "{{ zoneinfo | default('Canada/Atlantic') }}"
+
+configure_system_root_password: "{{ root_password | default('password') }}"

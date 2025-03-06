@@ -1,0 +1,12 @@
+---
+- name: Create GitHub user
+  ansible.builtin.user:
+    name: github
+    state: present
+    shell: /bin/bash
+    home: /home/github
+    group: github
+    uid: 1000
+    createhome: true
+    groups: docker
+  become: true

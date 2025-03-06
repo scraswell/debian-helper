@@ -1,0 +1,21 @@
+---
+complete_installation_bootstrap_dir: "{{ bootstrap_dir | default('/mnt') }}"
+complete_installation_reboot: "{{ reboot | default(false) }}"
+complete_installation_lvm: "{{ lvm | default(false) }}"
+complete_installation_vg_name: "{{ vg_name | default('vg0') }}"
+complete_installation_lv_root_name: "{{ lv_root_name | default('root') }}"
+complete_installation_lv_swap_name: "{{ lv_swap_name | default('swap') }}"
+
+complete_installation_efi_dev: "{{ installation_device }}1"
+
+complete_installation_swap_dev: >-
+  {{
+    '/dev/mapper/' ~ complete_installation_vg_name ~ '-' ~ complete_installation_lv_swap_name if complete_installation_lvm
+    else installation_device ~ '2'
+  }}
+
+complete_installation_root_dev: >-
+  {{
+    '/dev/mapper/' ~ complete_installation_vg_name ~ '-' ~ complete_installation_lv_root_name if complete_installation_lvm
+    else installation_device ~ '3'
+  }}
