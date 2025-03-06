@@ -1,7 +1,0 @@
----
-efi_size_bytes: "{{ ((efi_size_mib | int) * 1024 * 1024) | int }}"
-swap_size_bytes: "{{ ((swap_size_gib | int) * 1024 * 1024 * 1024) | int }}"
-
-efi_dev: "{{ installation_device }}1"
-swap_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_swap_name if lvm else installation_device ~ '2' }}"
-root_dev: "{{ '/dev/mapper/' ~ vg_name ~ '-' ~ lv_root_name if lvm else installation_device ~ '3' }}"

@@ -1,0 +1,28 @@
+---
+provision_disks_lvm: "{{ lvm | default(false) }}"
+provision_disks_vg_name: "{{ vg_name | default('vg0') }}"
+provision_disks_lv_root_name: "{{ lv_root_name | default('root') }}"
+provision_disks_lv_swap_name: "{{ lv_swap_name | default('swap') }}"
+
+provision_disks_efi_size_bytes: "{{ ((efi_size_mib | default(300) | int) * 1024 * 1024) | int }}"
+provision_disks_efi_start_sector: "{{ start_sector | default(2048) }}"
+provision_disks_efi_sectors: "{{ ((provision_disks_efi_size_bytes | int) / (installation_disk.sectorsize | int)) | int }}"
+
+provision_disks_swap_size_bytes: "{{ ((swap_size_gib | default(4) | int) * 1024 * 1024 * 1024) | int }}"
+provision_disks_swap_start_sector: "{{ (provision_disks_efi_start_sector | int) + (provision_disks_efi_sectors | int) | int }}"
+provision_disks_swap_sectors: "{{ ((provision_disks_swap_size_bytes | int) / (installation_disk.sectorsize | int)) | int }}"
+
+provision_disks_root_start_sector: "{{ (provision_disks_swap_start_sector | int) + (provision_disks_swap_sectors | int) | int }}"
+provision_disks_lvm_start_sector: "{{ (provision_disks_efi_start_sector | int) + (provision_disks_efi_sectors | int) | int }}"
+
+provision_disks_efi_dev: "{{ installation_device }}1"
+provision_disks_swap_dev: >-
+  {{
+    '/dev/mapper/' ~ provision_disks_vg_name ~ '-' ~ provision_disks_lv_swap_name if provision_disks_lvm
+    else installation_device ~ '2'
+  }}
+provision_disks_root_dev: >-
+  {{
+    '/dev/mapper/' ~ provision_disks_vg_name ~ '-' ~ provision_disks_lv_root_name if provision_disks_lvm
+    else installation_device ~ '3'
+  }}

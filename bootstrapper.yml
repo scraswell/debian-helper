@@ -1,0 +1,7 @@
+---
+- name: Install Docker
+  hosts: archiso
+  roles:
+    - role: install_docker
+  tags:
+    - install_docker

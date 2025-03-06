@@ -1,0 +1,18 @@
+---
+prep_system_bootstrap_dir: "{{ bootstrap_dir | default('/mnt') }}"
+prep_system_lvm: "{{ lvm | default(false) }}"
+prep_system_vg_name: "{{ vg_name | default('vg0') }}"
+prep_system_lv_root_name: "{{ lv_root_name | default('root') }}"
+prep_system_lv_swap_name: "{{ lv_swap_name | default('swap') }}"
+
+prep_system_efi_dev: "{{ installation_device }}1"
+prep_system_swap_dev: >-
+  {{
+    '/dev/mapper/' ~ prep_system_vg_name ~ '-' ~ prep_system_lv_swap_name if prep_system_lvm
+    else installation_device ~ '2'
+  }}
+prep_system_root_dev: >-
+  {{
+    '/dev/mapper/' ~ prep_system_vg_name ~ '-' ~ prep_system_lv_root_name if prep_system_lvm
+    else installation_device ~ '3'
+  }}

@@ -1,3 +1,12 @@
+---
+- name: Validate installation_device
+  ansible.builtin.assert:
+    that:
+      - installation_device is defined
+      - installation_device is match("^(\/dev\/[a-z]+)$")
+    fail_msg: "The installation_device variable must be defined and match the pattern ^/dev/[a-z]+$"
+    success_msg: "The installation_device variable is defined and matches the pattern ^/dev/[a-z]+$"
+
 - name: Determine VG information from Installation Disk
   ansible.builtin.shell:
     cmd: |
@@ -21,6 +30,8 @@
   when:
     - vg_info_result.rc == 0
     - vg_info_result.stdout != ""
+  register: lvchange_result
+  changed_when: lvchange_result.rc == 0
 
 - name: Remove LVs
   ansible.builtin.shell:
@@ -30,6 +41,8 @@
   when:
     - vg_info_result.rc == 0
     - vg_info_result.stdout != ""
+  register: lvremove_result
+  changed_when: lvremove_result.rc == 0
 
 - name: Remove VGs
   ansible.builtin.shell:
@@ -39,6 +52,8 @@
   when:
     - vg_info_result.rc == 0
     - vg_info_result.stdout != ""
+  register: vgremove_result
+  changed_when: vgremove_result.rc == 0
 
 - name: Remove PVs
   ansible.builtin.shell:
@@ -48,6 +63,8 @@
   when:
     - vg_info_result.rc == 0
     - vg_info_result.stdout != ""
+  register: pvremove_result
+  changed_when: pvremove_result.rc == 0
 
 - name: Wipe LVM data
   ansible.builtin.shell:
@@ -57,11 +74,15 @@
   when:
     - vg_info_result.rc == 0
     - vg_info_result.stdout != ""
+  register: wipefs_result
+  changed_when: wipefs_result.rc == 0
 
 - name: Clean disk
   ansible.builtin.shell:
     cmd: |
       sgdisk -Z {{ installation_device }}
+  register: sgdisk_result
+  changed_when: sgdisk_result.rc == 0
 
 - name: Execute partprobe
   ansible.builtin.shell:

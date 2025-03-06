@@ -1,0 +1,91 @@
+---
+- name: Configure clock
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ configure_system_bootstrap_dir }} ln -sf /usr/share/zoneinfo/{{ configure_system_zoneinfo }} /etc/localtime
+  register: configure_clock_result
+  changed_when: configure_clock_result.rc == 0
+
+- name: Copy locale.gen
+  ansible.builtin.copy:
+    content: |
+      en_US.UTF-8 UTF-8
+    dest: "{{ configure_system_bootstrap_dir }}/etc/locale.gen"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Generate locale
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ configure_system_bootstrap_dir }} locale-gen
+  register: generate_locale_result
+  changed_when: generate_locale_result.rc == 0
+
+- name: Copy locale.conf
+  ansible.builtin.copy:
+    content: |
+      LANG=en_US.UTF-8
+    dest: "{{ configure_system_bootstrap_dir }}/etc/locale.conf"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Update locale
+  ansible.builtin.shell:
+    cmd: |
+      arch-chroot {{ configure_system_bootstrap_dir }} update-locale LANG=en_US.UTF-8 LANGUAGE
+  register: update_locale_result
+  changed_when: update_locale_result.rc == 0
+
+- name: Copy issue
+  ansible.builtin.copy:
+    content: |
+      {{ os_name }} GNU/Linux (\v) \n (\4) \l
+    dest: "{{ configure_system_bootstrap_dir }}/etc/issue"
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Create .vimrc
+  ansible.builtin.copy:
+    content: |
+      :set encoding=utf-8
+      :set tabstop=4
+      :set shiftwidth=4
+      :set softtabstop=4
+      :set expandtab
+      :set nowrap
+      :set number
+      :set ruler
+      :set nobackup
+      :set noundofile
+      :set smartindent
+      :filetype indent on
+      :syntax on
+    dest: "{{ vimrc_dest }}"
+    mode: '0644'
+    owner: root
+    group: root
+  loop:
+    - "{{ configure_system_bootstrap_dir }}/root/.vimrc"
+    - "{{ configure_system_bootstrap_dir }}/etc/skel/.vimrc"
+  loop_control:
+    loop_var: vimrc_dest
+
+- name: Set root password
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail && \
+      echo "root:{{ configure_system_root_password }}" | arch-chroot {{ configure_system_bootstrap_dir }} chpasswd
+  register: set_root_password_result
+  changed_when: set_root_password_result.rc == 0
+
+- name: Configure sudoers
+  ansible.builtin.copy:
+    content: |
+      %sudo ALL=(ALL) NOPASSWD: ALL
+    dest: "{{ configure_system_bootstrap_dir }}/etc/sudoers.d/99-wheel_no_passwd"
+    mode: '0644'
+    owner: root
+    group: root
