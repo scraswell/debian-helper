@@ -1,0 +1,14 @@
+[Unit]
+Description=Unbound DNS service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+WorkingDirectory=/opt/dns
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose build --no-cache
+ExecStop=/usr/bin/docker compose down --volumes
+
+[Install]
+WantedBy=multi-user.target

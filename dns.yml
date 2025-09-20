@@ -1,0 +1,16 @@
+---
+- name: Install DNS
+  hosts: dns
+  roles:
+    - role: dns_server
+  tags:
+    - dns_server
+  become: true
+
+- name: Install DHCP
+  hosts: dhcp
+  roles:
+    - role: dhcp_server
+  tags:
+    - dhcp_server
+  become: true

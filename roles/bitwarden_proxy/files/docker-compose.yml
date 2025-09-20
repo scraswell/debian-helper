@@ -1,0 +1,25 @@
+services:
+  bw-serve:
+    build:
+      context: .
+      dockerfile: Dockerfile.bitwarden
+    ports:
+      - "8087:8087/tcp"
+    environment:
+      BW_CLIENTID: user.ce9b56a3-5f7b-4ed3-9243-986a1ba75095
+      BW_CLIENTSECRET: IgsXz1fttpWOxnws3R440g4Nj9EwDr
+      BW_PASSWORD: thisisapassword
+#    networks:
+#      dns:
+#        ipv4_address: 192.168.123.253
+#
+#networks:
+#  dns:
+#    driver: macvlan
+#    driver_opts:
+#      parent: macvlan0
+#    ipam:
+#      config:
+#        - subnet: "192.168.122.0/23"
+#          ip_range: "192.168.123.253/32"
+#          gateway: "192.168.122.1"

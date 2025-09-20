@@ -1,0 +1,29 @@
+FROM debian:latest
+
+ARG BW_SERVER=https://bitwarden.at.home
+
+COPY entrypoint.sh /opt/bitwarden/entrypoint.sh
+COPY ca.cert.pem /usr/local/share/ca-certificates/root_ca.crt
+
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/root_ca.crt
+
+ENV PATH=/opt/bitwarden:$PATH
+
+RUN apt-get update && \
+    apt-get upgrade && \
+    apt-get -y install openssl curl unzip bash && \
+    curl -fsSL -o /tmp/bitwarden-cli.zip 'https://bitwarden.com/download/?app=cli&platform=linux' && \
+    mkdir -pv /opt/bitwarden && \
+    unzip -d /opt/bitwarden /tmp/bitwarden-cli.zip bw && \
+    rm /tmp/bitwarden-cli.zip && \
+    groupadd bitwarden && \
+    useradd -g bitwarden -d /home/bitwarden -m -s /bin/bash bitwarden && \
+    update-ca-certificates
+
+USER bitwarden
+
+RUN /opt/bitwarden/bw config server ${BW_SERVER}
+
+EXPOSE 8087/tcp
+
+ENTRYPOINT [ "/opt/bitwarden/entrypoint.sh" ]

@@ -1,0 +1,13 @@
+$TTL 1800
+@                   IN  SOA     ns1.at.home. dns.at.home. (
+                    2025031701  ; Serial
+                    1800        ; refresh (1 day)
+                    900         ; retry (1 hr)
+                    86400       ; expire (1 week)
+                    86400 )     ; minimum (1 day)
+
+@                   IN  NS      ns1.at.home.
+
+37                  IN  PTR     sean-desktop.at.home.
+253                 IN  PTR     dhcp.at.home.
+254                 IN  PTR     ns1.at.home.

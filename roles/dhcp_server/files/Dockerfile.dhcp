@@ -1,0 +1,12 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache kea bash
+
+# Create the /run/kea directory
+RUN mkdir -p /run/kea && chown kea:kea /run/kea
+
+EXPOSE 67/udp 647/tcp 647/udp
+
+ENTRYPOINT [ "/usr/sbin/kea-dhcp4" ]
+
+CMD [ "-d", "-c", "/etc/kea/kea-dhcp4.conf" ]

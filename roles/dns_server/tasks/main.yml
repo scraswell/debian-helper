@@ -1,0 +1,34 @@
+---
+- name: Create folder for DNS service
+  ansible.builtin.file:
+    path: /opt/dns
+    state: directory
+    mode: '0755'
+
+- name: Copy DNS configuration files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  with_items:
+    - { src: 'files/unbound.conf', dest: '/opt/dns/unbound.conf' }
+    - { src: 'files/Dockerfile.dns', dest: '/opt/dns/Dockerfile.dns' }
+    - { src: 'files/at.home.zone', dest: '/opt/dns/at.home.zone' }
+    - { src: 'files/at.home.reverse.122.zone', dest: '/opt/dns/at.home.reverse.122.zone' }
+    - { src: 'files/at.home.reverse.123.zone', dest: '/opt/dns/at.home.reverse.123.zone' }
+    - { src: 'files/docker-compose.yml', dest: '/opt/dns/docker-compose.yml' }
+  notify: Restart DNS
+
+- name: Copy DNS systemd unitfile
+  ansible.builtin.copy:
+    src: 'files/dns.service'
+    dest: '/etc/systemd/system/dns.service'
+    mode: '0644'
+  notify: Restart DNS
+
+- name: Enable DNS
+  ansible.builtin.systemd:
+    name: dns
+    enabled: true
+    state: started
+    daemon_reload: true

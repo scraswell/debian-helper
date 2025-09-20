@@ -1,0 +1,18 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache unbound bash openssl
+
+COPY unbound.conf /etc/unbound/unbound.conf
+COPY at.home.zone /etc/unbound/zones/at.home.zone
+COPY at.home.reverse.122.zone /etc/unbound/zones/at.home.reverse.122.zone
+COPY at.home.reverse.123.zone /etc/unbound/zones/at.home.reverse.123.zone
+# ADD https://raw.githubusercontent.com/hagezi/dns-blocklists/main/rpz/light.txt /etc/unbound/rpz.blocklist.zone
+# RUN chmod 644 /etc/unbound/rpz.blocklist.zone
+
+RUN unbound-control-setup
+
+EXPOSE 53/udp
+
+ENTRYPOINT [ "/usr/sbin/unbound" ]
+
+CMD ["-d", "-c", "/etc/unbound/unbound.conf" ]

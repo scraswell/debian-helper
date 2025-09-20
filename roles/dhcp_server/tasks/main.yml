@@ -1,0 +1,25 @@
+---
+- name: Create folder for DHCP service
+  ansible.builtin.file:
+    path: /opt/dhcp
+    state: directory
+    mode: '0755'
+
+- name: Copy DHCP configuration files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  notify: Restart DHCP
+  with_items:
+    - { src: 'files/dhcp.service', dest: '/etc/systemd/system/dhcp.service' }
+    - { src: 'files/Dockerfile.dhcp', dest: '/opt/dhcp/Dockerfile.dhcp' }
+    - { src: 'files/kea-dhcp4.conf', dest: '/opt/dhcp/kea-dhcp4.conf' }
+    - { src: 'files/docker-compose.yml', dest: '/opt/dhcp/docker-compose.yml' }
+
+- name: Enable DHCP
+  ansible.builtin.systemd:
+    name: dhcp
+    enabled: true
+    state: started
+    daemon_reload: true

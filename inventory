@@ -1,2 +1,8 @@
 [local]
 archiso ansible_host=localhost ansible_connection=local
+
+[dns]
+bootstrapper ansible_host=192.168.123.245
+
+[dhcp]
+bootstrapper ansible_host=192.168.123.245

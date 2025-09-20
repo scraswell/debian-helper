@@ -1,0 +1,27 @@
+name: homelab
+
+services:
+  dns:
+    build:
+      context: .
+      dockerfile: Dockerfile.dns
+    restart: always
+    healthcheck:
+      test: ["CMD", "nslookup", "ns1.at.home", "127.0.0.1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      dns:
+        ipv4_address: 192.168.123.254
+
+networks:
+  dns:
+    driver: macvlan
+    driver_opts:
+      parent: macvlan0
+    ipam:
+      config:
+        - subnet: "192.168.122.0/23"
+          ip_range: "192.168.123.254/32"
+          gateway: "192.168.122.1"

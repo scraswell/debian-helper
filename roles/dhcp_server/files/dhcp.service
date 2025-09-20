@@ -1,0 +1,14 @@
+[Unit]
+Description=DHCP Server
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+WorkingDirectory=/opt/dhcp
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose build --no-cache
+ExecStop=/usr/bin/docker compose down --volumes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+$TTL 1800
+@                   IN  SOA     ns1.at.home. dns.at.home. (
+                    2025031701  ; Serial
+                    1800        ; refresh (1 day)
+                    900         ; retry (1 hr)
+                    86400       ; expire (1 week)
+                    86400 )     ; minimum (1 day)
+
+@                   IN  NS      ns1.at.home.
+
+1                   IN  PTR     gateway.at.home.
+2                   IN  PTR     vmhost01.at.home.
+3                   IN  PTR     vmhost02.at.home.
+6                   IN  PTR     truenas-lagg0.at.home.
+192                 IN  PTR     smbd.at.home.
+193                 IN  PTR     bitwarden.at.home.
+252                 IN  PTR     tftp.at.home.
+254                 IN  PTR     avahi.at.home.

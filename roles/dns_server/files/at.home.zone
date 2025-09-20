@@ -1,0 +1,22 @@
+$TTL 1800
+@   IN          SOA at.home.   dns.at.home.   (
+                2025031701  ; serial
+                1800        ; refresh (1 day)
+                900         ; retry (1 hr)
+                86400       ; expire (1 week)
+                86400 )     ; minimum (1 day)
+
+@                           NS      ns1.at.home.
+truenas                     CNAME   truenas-lagg0.at.home.
+
+gateway                     A       192.168.122.1
+vmhost01                    A       192.168.122.2
+vmhost02                    A       192.168.122.3
+hp-printer                  A       192.168.122.5
+truenas-lagg0               A       192.168.122.6
+tm-backups                  A       192.168.122.192
+bitwarden                   A       192.168.122.193
+homeassistant               A       192.168.122.250
+sean-desktop                A       192.168.123.37
+docker01                    A       192.168.123.134
+ns1                         A       192.168.123.254

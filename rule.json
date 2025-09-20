@@ -1,0 +1,19 @@
+{
+	"_id": "67d83b62155ac55cff51e4b6",
+	"description": "Forward LG TV",
+	"domains": [],
+	"enabled": false,
+	"ip_addresses": [],
+	"ip_ranges": [],
+	"kill_switch_enabled": true,
+	"matching_target": "INTERNET",
+	"network_id": "67d83a5c155ac55cff51e44c",
+	"next_hop": "",
+	"regions": [],
+	"target_devices": [
+		{
+			"client_mac": "f8:01:b4:53:b8:c4",
+			"type": "CLIENT"
+		}
+	]
+}
